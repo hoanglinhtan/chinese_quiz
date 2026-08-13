@@ -47,8 +47,11 @@
         <div class="question-type" id="question-type"></div>
       </div>
 
-      <!-- Feedback -->
-      <div class="feedback" id="feedback"></div>
+      <!-- Feedback + Next -->
+      <div class="feedback-row" id="feedback-row">
+        <div class="feedback" id="feedback"></div>
+        <button class="btn-next hidden" id="next-btn" onclick="nextQuestion()">Tiếp →</button>
+      </div>
 
       <!-- Choices -->
       <div class="choices-grid" id="choices-grid">
@@ -70,10 +73,7 @@
         </button>
       </div>
 
-      <!-- Next Button (shown after answering) -->
-      <button class="btn-primary next-btn hidden" id="next-btn" onclick="nextQuestion()">
-        Câu tiếp theo →
-      </button>
+
     </div>
 
     <!-- Divider -->
