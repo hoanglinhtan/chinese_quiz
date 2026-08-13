@@ -17,8 +17,45 @@
     </header>
 
     <main>
+      <!-- Active Session Banner -->
+      <div class="active-session-banner hidden" id="active-session-banner">
+        <div class="active-session-header">
+          <span class="active-session-badge">🎮 Lượt chơi dở</span>
+          <span class="history-date" id="session-time-label"></span>
+        </div>
+        <div class="active-session-details" id="active-session-details">
+          <!-- HSK 5 • Câu 14 (11 Đúng / 3 Sai) -->
+        </div>
+        <div class="active-session-actions">
+          <button class="btn-primary btn-sm" onclick="resumeActiveSession()">▶️ Tiếp tục chơi</button>
+          <button class="btn-secondary btn-sm" onclick="discardActiveSession()">✖️ Xóa lượt này</button>
+        </div>
+      </div>
+
+      <!-- Data Source Selector -->
+      <div class="source-selector-container">
+        <div class="source-selector-title">Nguồn dữ liệu:</div>
+        <div class="source-tabs">
+          <button class="source-tab active" id="tab-custom" onclick="selectSource('custom')">
+            <span class="source-tab-icon">📁</span>
+            <div class="source-tab-info">
+              <span class="source-tab-name">Tải lên (của bạn)</span>
+              <span class="source-tab-desc" id="custom-count-label">1,733 từ</span>
+            </div>
+          </button>
+          <button class="source-tab" id="tab-gemini" onclick="selectSource('gemini')">
+            <span class="source-tab-icon">✨</span>
+            <div class="source-tab-info">
+              <span class="source-tab-name">Nguồn Gemini</span>
+              <span class="source-tab-desc" id="gemini-count-label">2,176 từ</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Level Cards -->
       <div class="level-grid" id="level-grid">
-        <a class="level-card" href="quiz.html?level=hsk2" id="hsk2-card">
+        <a class="level-card" href="#" onclick="navigateToQuiz('hsk2'); return false;" id="hsk2-card">
           <div class="level-badge hsk3">H2</div>
           <div class="level-info">
             <div class="level-name">HSK 2</div>
@@ -27,7 +64,7 @@
           <span class="level-arrow">→</span>
         </a>
 
-        <a class="level-card" href="quiz.html?level=hsk3" id="hsk3-card">
+        <a class="level-card" href="#" onclick="navigateToQuiz('hsk3'); return false;" id="hsk3-card">
           <div class="level-badge hsk3">H3</div>
           <div class="level-info">
             <div class="level-name">HSK 3</div>
@@ -36,7 +73,7 @@
           <span class="level-arrow">→</span>
         </a>
 
-        <a class="level-card" href="quiz.html?level=hsk4" id="hsk4-card">
+        <a class="level-card" href="#" onclick="navigateToQuiz('hsk4'); return false;" id="hsk4-card">
           <div class="level-badge hsk4">H4</div>
           <div class="level-info">
             <div class="level-name">HSK 4</div>
@@ -45,10 +82,10 @@
           <span class="level-arrow">→</span>
         </a>
 
-        <a class="level-card" href="quiz.html?level=hsk5" id="hsk5-card">
+        <a class="level-card" href="#" onclick="navigateToQuiz('hsk5'); return false;" id="hsk5-card">
           <div class="level-badge hsk5">H5</div>
           <div class="level-info">
-            <div class="level-name">HSK 5 (Tổng hợp)</div>
+            <div class="level-name" id="hsk5-title">HSK 5 (Tổng hợp)</div>
             <div class="level-desc" id="hsk5-desc">Tất cả từ vựng · Trình độ cao cấp</div>
           </div>
           <span class="level-arrow">→</span>
@@ -58,9 +95,33 @@
   </div>
 
   <script src="vocab_data.js"></script>
+  <script src="gemini_hsk5_data.js"></script>
   <script>
-    // Display word counts on cards
-    document.addEventListener('DOMContentLoaded', () => {
+    let activeSource = localStorage.getItem('hsk_data_source') || 'custom';
+
+    function selectSource(source) {
+      activeSource = source;
+      localStorage.setItem('hsk_data_source', source);
+
+      document.getElementById('tab-custom').classList.toggle('active', source === 'custom');
+      document.getElementById('tab-gemini').classList.toggle('active', source === 'gemini');
+
+      updateLevelDescriptions();
+    }
+
+    function updateLevelDescriptions() {
+      if (activeSource === 'gemini') {
+        document.getElementById('hsk5-title').textContent = 'HSK 5 (Nguồn Gemini)';
+        if (typeof GEMINI_HSK5_DATA !== 'undefined') {
+          document.getElementById('hsk5-desc').textContent = GEMINI_HSK5_DATA.length + ' từ vựng · HSK 5 Chuẩn từ Gemini';
+        }
+      } else {
+        document.getElementById('hsk5-title').textContent = 'HSK 5 (Tổng hợp từ file)';
+        if (typeof ALL_DATA !== 'undefined') {
+          document.getElementById('hsk5-desc').textContent = ALL_DATA.length + ' từ vựng · Gộp tất cả từ file tải lên';
+        }
+      }
+
       if (typeof HSK2_DATA !== 'undefined') {
         document.getElementById('hsk2-desc').textContent = HSK2_DATA.length + ' từ vựng · Trình độ sơ cấp';
       }
@@ -70,9 +131,62 @@
       if (typeof HSK4_DATA !== 'undefined') {
         document.getElementById('hsk4-desc').textContent = HSK4_DATA.length + ' từ vựng · Trình độ trung cấp';
       }
-      if (typeof ALL_DATA !== 'undefined') {
-        document.getElementById('hsk5-desc').textContent = ALL_DATA.length + ' từ vựng · Tổng hợp tất cả';
+    }
+
+    function navigateToQuiz(level) {
+      window.location.href = `quiz.html?level=${level}&source=${activeSource}`;
+    }
+
+    function checkActiveSession() {
+      try {
+        const raw = localStorage.getItem('hsk_active_session');
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        if (data && data.questionCount > 0) {
+          const banner = document.getElementById('active-session-banner');
+          const details = document.getElementById('active-session-details');
+          const timeLabel = document.getElementById('session-time-label');
+
+          const levelName = data.level ? data.level.toUpperCase() : 'HSK';
+          const sourceName = data.source === 'gemini' ? 'Gemini' : 'File tải lên';
+          
+          details.textContent = `${levelName} (${sourceName}) • Câu thứ ${data.questionCount} (${data.correctCount} Đúng / ${data.incorrectCount} Sai)`;
+          
+          if (data.lastUpdated) {
+            const d = new Date(data.lastUpdated);
+            timeLabel.textContent = `${d.getHours()}:${d.getMinutes() < 10 ? '0' : ''}${d.getMinutes()}`;
+          }
+
+          banner.classList.remove('hidden');
+        }
+      } catch (e) {
+        console.error('Error checking active session:', e);
       }
+    }
+
+    function resumeActiveSession() {
+      const raw = localStorage.getItem('hsk_active_session');
+      if (raw) {
+        const data = JSON.parse(raw);
+        window.location.href = `quiz.html?level=${data.level || 'hsk5'}&source=${data.source || 'custom'}&resume=1`;
+      }
+    }
+
+    function discardActiveSession() {
+      localStorage.removeItem('hsk_active_session');
+      document.getElementById('active-session-banner').classList.add('hidden');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Set initial counts in source selector tabs
+      if (typeof ALL_DATA !== 'undefined') {
+        document.getElementById('custom-count-label').textContent = ALL_DATA.length + ' từ';
+      }
+      if (typeof GEMINI_HSK5_DATA !== 'undefined') {
+        document.getElementById('gemini-count-label').textContent = GEMINI_HSK5_DATA.length + ' từ';
+      }
+      selectSource(activeSource);
+      checkActiveSession();
     });
   </script>
 </body>

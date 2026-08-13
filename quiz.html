@@ -13,9 +13,12 @@
     <!-- Header -->
     <div class="quiz-header">
       <button class="back-btn" onclick="window.location.href='index.html'" id="back-btn">
-        ← Quay lại
+        ← Trang chủ
       </button>
       <span class="quiz-level-badge" id="quiz-level-badge">HSK 5</span>
+      <button class="btn-save-session" onclick="finishAndSaveSession()" id="save-session-btn" title="Lưu phiên chơi vào lịch sử">
+        💾 Lưu & Kết thúc
+      </button>
       <a class="stats-link" href="stats.html" id="stats-link">
         📊 Thống kê
       </a>
@@ -92,6 +95,7 @@
   </div>
 
   <script src="vocab_data.js"></script>
+  <script src="gemini_hsk5_data.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
