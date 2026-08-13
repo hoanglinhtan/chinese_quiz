@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Quiz từ vựng HSK 5 - Luyện tập với 1250 từ vựng tiếng Trung">
+  <title>HSK 5 Quiz - Luyện Từ Vựng</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🀄</text></svg>">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <div class="quiz-header">
+      <button class="back-btn" onclick="window.location.href='index.html'" id="back-btn">
+        ← Quay lại
+      </button>
+      <a class="stats-link" href="stats.html" id="stats-link">
+        📊 Thống kê
+      </a>
+    </div>
+
+    <!-- Quiz Area -->
+    <div id="quiz-area">
+      <!-- Progress -->
+      <div class="progress-section" id="progress-section">
+        <div class="progress-info">
+          <span class="progress-label">Tiến trình</span>
+          <span class="progress-count" id="progress-count">0 / 15</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Question -->
+      <div class="question-card" id="question-card">
+        <div class="question-label">Từ vựng</div>
+        <div class="question-chinese" id="question-chinese">汉字</div>
+        <div class="question-pinyin" id="question-pinyin">pīnyīn</div>
+        <div class="question-type" id="question-type"></div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="feedback" id="feedback"></div>
+
+      <!-- Choices -->
+      <div class="choices-grid" id="choices-grid">
+        <button class="choice-btn" id="choice-0" onclick="selectAnswer(0)">
+          <span class="choice-letter">A</span>
+          <span class="choice-text" id="choice-text-0"></span>
+        </button>
+        <button class="choice-btn" id="choice-1" onclick="selectAnswer(1)">
+          <span class="choice-letter">B</span>
+          <span class="choice-text" id="choice-text-1"></span>
+        </button>
+        <button class="choice-btn" id="choice-2" onclick="selectAnswer(2)">
+          <span class="choice-letter">C</span>
+          <span class="choice-text" id="choice-text-2"></span>
+        </button>
+        <button class="choice-btn" id="choice-3" onclick="selectAnswer(3)">
+          <span class="choice-letter">D</span>
+          <span class="choice-text" id="choice-text-3"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Summary (hidden initially) -->
+    <div id="summary-area" class="hidden">
+      <div class="glass-card summary-card">
+        <div class="summary-emoji" id="summary-emoji">🎉</div>
+        <div class="summary-title">Hoàn thành!</div>
+        <div class="summary-score" id="summary-score">0/15</div>
+        <div class="summary-label">câu trả lời đúng</div>
+
+        <div class="summary-stats">
+          <div class="stat-item">
+            <div class="stat-value correct-text" id="stat-correct">0</div>
+            <div class="stat-label">Đúng ✓</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value incorrect-text" id="stat-incorrect">0</div>
+            <div class="stat-label">Sai ✗</div>
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn-primary" onclick="startNewQuiz()" id="play-again-btn">
+            🔄 Chơi lại
+          </button>
+          <a class="btn-secondary" href="stats.html" id="view-stats-btn">
+            📊 Xem thống kê
+          </a>
+          <a class="btn-secondary" href="index.html" id="back-home-btn">
+            ← Về trang chính
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="divider"></div>
+
+    <!-- Marked Words Section -->
+    <div class="marked-section" id="marked-section">
+      <div class="section-title">
+        <span class="icon">📌</span>
+        Từ cần ôn tập
+      </div>
+      <div id="marked-content">
+        <!-- Filled by JS -->
+      </div>
+    </div>
+  </div>
+
+  <script src="hsk5_data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

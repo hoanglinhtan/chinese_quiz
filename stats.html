@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Thống kê từ vựng HSK cần ôn tập">
+  <title>Thống kê - HSK Quiz</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🀄</text></svg>">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <div class="stats-header">
+      <button class="back-btn" onclick="history.back()" id="stats-back-btn">
+        ← Quay lại
+      </button>
+      <h1 class="stats-title">📊 Thống kê</h1>
+      <span class="stats-count" id="stats-total">0 từ</span>
+    </div>
+
+    <!-- Stats List -->
+    <div class="stats-list" id="stats-list">
+      <!-- Filled by JS -->
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state hidden" id="empty-state">
+      <div class="empty-icon">🎯</div>
+      <p>Chưa có từ nào cần ôn tập!</p>
+      <p style="font-size: 0.8125rem;">Các từ trả lời sai nhiều lần sẽ xuất hiện ở đây.</p>
+    </div>
+
+    <!-- Actions -->
+    <div class="stats-actions" id="stats-actions">
+      <button class="btn-danger" onclick="confirmClearAll()" id="clear-all-btn">
+        🗑️ Xóa tất cả
+      </button>
+      <a class="btn-primary" href="quiz.html" id="start-quiz-btn">
+        🎮 Tiếp tục luyện tập
+      </a>
+    </div>
+  </div>
+
+  <!-- Confirm Dialog -->
+  <div class="dialog-overlay hidden" id="confirm-dialog">
+    <div class="dialog-box">
+      <div class="dialog-icon">⚠️</div>
+      <div class="dialog-title">Xóa tất cả?</div>
+      <div class="dialog-message">Bạn có chắc muốn xóa tất cả từ đã đánh dấu? Hành động này không thể hoàn tác.</div>
+      <div class="dialog-buttons">
+        <button class="btn-secondary" onclick="closeDialog()" id="cancel-clear-btn">Hủy</button>
+        <button class="btn-danger" onclick="clearAllMarks()" id="confirm-clear-btn">Xóa hết</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="hsk5_data.js"></script>
+  <script src="stats.js"></script>
+</body>
+</html>
