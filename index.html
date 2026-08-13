@@ -18,34 +18,62 @@
 
     <main>
       <div class="level-grid" id="level-grid">
-        <a class="level-card disabled" id="hsk3-card">
+        <a class="level-card" href="quiz.html?level=hsk2" id="hsk2-card">
+          <div class="level-badge hsk3">H2</div>
+          <div class="level-info">
+            <div class="level-name">HSK 2</div>
+            <div class="level-desc" id="hsk2-desc">Trình độ sơ cấp</div>
+          </div>
+          <span class="level-arrow">→</span>
+        </a>
+
+        <a class="level-card" href="quiz.html?level=hsk3" id="hsk3-card">
           <div class="level-badge hsk3">H3</div>
           <div class="level-info">
-            <div class="level-name">HSK 3 Vocabs</div>
-            <div class="level-desc">Trình độ sơ trung cấp</div>
+            <div class="level-name">HSK 3</div>
+            <div class="level-desc" id="hsk3-desc">Trình độ sơ trung cấp</div>
           </div>
-          <span class="coming-soon-tag">Coming Soon</span>
+          <span class="level-arrow">→</span>
         </a>
 
-        <a class="level-card disabled" id="hsk4-card">
+        <a class="level-card" href="quiz.html?level=hsk4" id="hsk4-card">
           <div class="level-badge hsk4">H4</div>
           <div class="level-info">
-            <div class="level-name">HSK 4 Vocabs</div>
-            <div class="level-desc">Trình độ trung cấp</div>
+            <div class="level-name">HSK 4</div>
+            <div class="level-desc" id="hsk4-desc">Trình độ trung cấp</div>
           </div>
-          <span class="coming-soon-tag">Coming Soon</span>
+          <span class="level-arrow">→</span>
         </a>
 
-        <a class="level-card" href="quiz.html" id="hsk5-card">
+        <a class="level-card" href="quiz.html?level=hsk5" id="hsk5-card">
           <div class="level-badge hsk5">H5</div>
           <div class="level-info">
-            <div class="level-name">HSK 5 Vocabs</div>
-            <div class="level-desc">1250 từ vựng · Trình độ cao cấp</div>
+            <div class="level-name">HSK 5 (Tổng hợp)</div>
+            <div class="level-desc" id="hsk5-desc">Tất cả từ vựng · Trình độ cao cấp</div>
           </div>
           <span class="level-arrow">→</span>
         </a>
       </div>
     </main>
   </div>
+
+  <script src="vocab_data.js"></script>
+  <script>
+    // Display word counts on cards
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof HSK2_DATA !== 'undefined') {
+        document.getElementById('hsk2-desc').textContent = HSK2_DATA.length + ' từ vựng · Trình độ sơ cấp';
+      }
+      if (typeof HSK3_DATA !== 'undefined') {
+        document.getElementById('hsk3-desc').textContent = HSK3_DATA.length + ' từ vựng · Trình độ sơ trung cấp';
+      }
+      if (typeof HSK4_DATA !== 'undefined') {
+        document.getElementById('hsk4-desc').textContent = HSK4_DATA.length + ' từ vựng · Trình độ trung cấp';
+      }
+      if (typeof ALL_DATA !== 'undefined') {
+        document.getElementById('hsk5-desc').textContent = ALL_DATA.length + ' từ vựng · Tổng hợp tất cả';
+      }
+    });
+  </script>
 </body>
 </html>

@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="description" content="Quiz từ vựng HSK 5 - Luyện tập với 1250 từ vựng tiếng Trung">
-  <title>HSK 5 Quiz - Luyện Từ Vựng</title>
+  <meta name="description" content="Quiz từ vựng HSK - Luyện tập từ vựng tiếng Trung">
+  <title>HSK Quiz - Luyện Từ Vựng</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🀄</text></svg>">
 </head>
@@ -15,6 +15,7 @@
       <button class="back-btn" onclick="window.location.href='index.html'" id="back-btn">
         ← Quay lại
       </button>
+      <span class="quiz-level-badge" id="quiz-level-badge">HSK 5</span>
       <a class="stats-link" href="stats.html" id="stats-link">
         📊 Thống kê
       </a>
@@ -22,14 +23,19 @@
 
     <!-- Quiz Area -->
     <div id="quiz-area">
-      <!-- Progress -->
-      <div class="progress-section" id="progress-section">
-        <div class="progress-info">
-          <span class="progress-label">Tiến trình</span>
-          <span class="progress-count" id="progress-count">0 / 15</span>
+      <!-- Score Bar -->
+      <div class="score-bar" id="score-bar">
+        <div class="score-item">
+          <span class="score-label">Câu hỏi</span>
+          <span class="score-value" id="question-number">1</span>
         </div>
-        <div class="progress-bar">
-          <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+        <div class="score-item">
+          <span class="score-label">Đúng</span>
+          <span class="score-value correct-text" id="correct-count">0</span>
+        </div>
+        <div class="score-item">
+          <span class="score-label">Sai</span>
+          <span class="score-value incorrect-text" id="incorrect-count">0</span>
         </div>
       </div>
 
@@ -63,39 +69,11 @@
           <span class="choice-text" id="choice-text-3"></span>
         </button>
       </div>
-    </div>
 
-    <!-- Summary (hidden initially) -->
-    <div id="summary-area" class="hidden">
-      <div class="glass-card summary-card">
-        <div class="summary-emoji" id="summary-emoji">🎉</div>
-        <div class="summary-title">Hoàn thành!</div>
-        <div class="summary-score" id="summary-score">0/15</div>
-        <div class="summary-label">câu trả lời đúng</div>
-
-        <div class="summary-stats">
-          <div class="stat-item">
-            <div class="stat-value correct-text" id="stat-correct">0</div>
-            <div class="stat-label">Đúng ✓</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value incorrect-text" id="stat-incorrect">0</div>
-            <div class="stat-label">Sai ✗</div>
-          </div>
-        </div>
-
-        <div class="btn-group">
-          <button class="btn-primary" onclick="startNewQuiz()" id="play-again-btn">
-            🔄 Chơi lại
-          </button>
-          <a class="btn-secondary" href="stats.html" id="view-stats-btn">
-            📊 Xem thống kê
-          </a>
-          <a class="btn-secondary" href="index.html" id="back-home-btn">
-            ← Về trang chính
-          </a>
-        </div>
-      </div>
+      <!-- Next Button (shown after answering) -->
+      <button class="btn-primary next-btn hidden" id="next-btn" onclick="nextQuestion()">
+        Câu tiếp theo →
+      </button>
     </div>
 
     <!-- Divider -->
@@ -113,7 +91,7 @@
     </div>
   </div>
 
-  <script src="hsk5_data.js"></script>
+  <script src="vocab_data.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

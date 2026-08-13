@@ -2,19 +2,19 @@
    HSK Quiz - Main Application Logic
    ============================================ */
 
-const QUESTIONS_PER_SESSION = 15;
 const WRONG_THRESHOLD = 2; // Mark word after this many wrong answers
-const NEXT_DELAY = 1500; // ms before auto-advancing
 
 // ── State ──────────────────────────────────
-let currentQuestions = [];
-let currentQuestionIndex = 0;
+let currentData = [];       // The word pool for current level
+let currentQuestion = null;  // Current question object
+let questionCount = 0;
 let correctCount = 0;
 let incorrectCount = 0;
 let answered = false;
+let currentLevel = 'hsk5';
 
 // ── Storage Keys ───────────────────────────
-const STORAGE_KEY = 'hsk5_wrong_counts';
+const STORAGE_KEY = 'hsk_wrong_counts';
 
 // ── Utility Functions ──────────────────────
 
@@ -31,18 +31,20 @@ function saveWrongCounts(counts) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(counts));
 }
 
-function incrementWrongCount(wordNo) {
+function incrementWrongCount(chinese) {
   const counts = getWrongCounts();
-  counts[wordNo] = (counts[wordNo] || 0) + 1;
+  counts[chinese] = (counts[chinese] || 0) + 1;
   saveWrongCounts(counts);
 }
 
 function getMarkedWords() {
   const counts = getWrongCounts();
   const marked = [];
-  for (const [no, count] of Object.entries(counts)) {
+  for (const [chinese, count] of Object.entries(counts)) {
     if (count >= WRONG_THRESHOLD) {
-      const word = HSK5_DATA.find(w => w.no === parseInt(no));
+      // Find word data from current data or all data
+      const searchPool = typeof ALL_DATA !== 'undefined' ? ALL_DATA : currentData;
+      const word = searchPool.find(w => w.chinese === chinese);
       if (word) {
         marked.push({ ...word, wrongCount: count });
       }
@@ -62,55 +64,80 @@ function shuffleArray(arr) {
   return shuffled;
 }
 
-// ── Quiz Generation ────────────────────────
+// ── Level Detection ────────────────────────
 
-function generateQuiz() {
-  // Pick 15 random words
-  const shuffled = shuffleArray(HSK5_DATA);
-  const selected = shuffled.slice(0, QUESTIONS_PER_SESSION);
+function detectLevel() {
+  const params = new URLSearchParams(window.location.search);
+  const level = params.get('level') || 'hsk5';
+  currentLevel = level;
 
-  return selected.map(word => {
-    // Generate 3 wrong choices (different meanings)
-    const otherWords = HSK5_DATA.filter(w => w.no !== word.no && w.meaning !== word.meaning);
-    const wrongChoices = shuffleArray(otherWords).slice(0, 3);
+  // Set data based on level
+  if (typeof DATA_MAP !== 'undefined' && DATA_MAP[level]) {
+    currentData = DATA_MAP[level];
+  } else if (typeof ALL_DATA !== 'undefined') {
+    currentData = ALL_DATA;
+  } else if (typeof HSK5_DATA !== 'undefined') {
+    currentData = HSK5_DATA;
+  }
 
-    // Build choices array with correct answer
-    const choices = shuffleArray([
-      { text: word.meaning, isCorrect: true },
-      ...wrongChoices.map(w => ({ text: w.meaning, isCorrect: false }))
-    ]);
-
-    return {
-      word,
-      choices,
-      correctIndex: choices.findIndex(c => c.isCorrect)
+  // Update badge
+  const badge = document.getElementById('quiz-level-badge');
+  if (badge) {
+    const labels = {
+      'hsk2': 'HSK 2',
+      'hsk3': 'HSK 3',
+      'hsk4': 'HSK 4',
+      'hsk5': 'HSK 5 (Tổng hợp)'
     };
-  });
+    badge.textContent = labels[level] || level.toUpperCase();
+  }
+
+  console.log(`Level: ${level}, Words: ${currentData.length}`);
+}
+
+// ── Question Generation ────────────────────
+
+function generateQuestion() {
+  // Pick a random word
+  const wordIndex = Math.floor(Math.random() * currentData.length);
+  const word = currentData[wordIndex];
+
+  // Generate 3 wrong choices (different meanings)
+  const otherWords = currentData.filter(w => w.chinese !== word.chinese && w.meaning !== word.meaning);
+  const wrongChoices = shuffleArray(otherWords).slice(0, 3);
+
+  // Build choices array with correct answer
+  const choices = shuffleArray([
+    { text: word.meaning, isCorrect: true },
+    ...wrongChoices.map(w => ({ text: w.meaning, isCorrect: false }))
+  ]);
+
+  return {
+    word,
+    choices,
+    correctIndex: choices.findIndex(c => c.isCorrect)
+  };
 }
 
 // ── Quiz Display ───────────────────────────
 
-function startNewQuiz() {
-  currentQuestions = generateQuiz();
-  currentQuestionIndex = 0;
+function startQuiz() {
+  questionCount = 0;
   correctCount = 0;
   incorrectCount = 0;
-
-  document.getElementById('quiz-area').classList.remove('hidden');
-  document.getElementById('summary-area').classList.add('hidden');
-
-  displayQuestion();
-  updateProgress();
+  showNextQuestion();
+  updateMarkedSection();
 }
 
-function displayQuestion() {
-  if (currentQuestionIndex >= currentQuestions.length) {
-    showSummary();
-    return;
-  }
-
+function showNextQuestion() {
   answered = false;
-  const q = currentQuestions[currentQuestionIndex];
+  questionCount++;
+  currentQuestion = generateQuestion();
+
+  // Update score bar
+  document.getElementById('question-number').textContent = questionCount;
+  document.getElementById('correct-count').textContent = correctCount;
+  document.getElementById('incorrect-count').textContent = incorrectCount;
 
   // Update question card with animation
   const card = document.getElementById('question-card');
@@ -118,21 +145,23 @@ function displayQuestion() {
   card.offsetHeight; // trigger reflow
   card.style.animation = 'cardIn 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
 
-  document.getElementById('question-chinese').textContent = q.word.chinese;
-  document.getElementById('question-type').textContent = q.word.type || '';
+  document.getElementById('question-chinese').textContent = currentQuestion.word.chinese;
+  document.getElementById('question-type').textContent = currentQuestion.word.type || '';
 
   // Hide pinyin initially
   const pinyinEl = document.getElementById('question-pinyin');
-  pinyinEl.textContent = q.word.pinyin;
+  pinyinEl.textContent = currentQuestion.word.pinyin;
   pinyinEl.classList.remove('show');
 
   // Reset feedback
   const feedback = document.getElementById('feedback');
   feedback.classList.remove('show', 'correct', 'incorrect');
 
+  // Hide next button
+  document.getElementById('next-btn').classList.add('hidden');
+
   // Set choices
-  const letters = ['A', 'B', 'C', 'D'];
-  q.choices.forEach((choice, i) => {
+  currentQuestion.choices.forEach((choice, i) => {
     const btn = document.getElementById(`choice-${i}`);
     const textEl = document.getElementById(`choice-text-${i}`);
     textEl.textContent = choice.text;
@@ -145,7 +174,7 @@ function selectAnswer(index) {
   if (answered) return;
   answered = true;
 
-  const q = currentQuestions[currentQuestionIndex];
+  const q = currentQuestion;
   const isCorrect = q.choices[index].isCorrect;
 
   // Show pinyin
@@ -169,8 +198,8 @@ function selectAnswer(index) {
     correctBtn.classList.add('correct');
     incorrectCount++;
 
-    // Track wrong answer
-    incrementWrongCount(q.word.no);
+    // Track wrong answer by chinese characters
+    incrementWrongCount(q.word.chinese);
 
     // Show incorrect feedback
     showFeedback(`✗ Sai rồi! Đáp án: ${q.word.meaning}`, 'incorrect');
@@ -178,6 +207,10 @@ function selectAnswer(index) {
     // Shake animation
     document.getElementById('question-card').classList.add('shake');
   }
+
+  // Update score
+  document.getElementById('correct-count').textContent = correctCount;
+  document.getElementById('incorrect-count').textContent = incorrectCount;
 
   // Disable all buttons
   for (let i = 0; i < 4; i++) {
@@ -187,14 +220,16 @@ function selectAnswer(index) {
     }
   }
 
-  // Auto-advance after delay
-  setTimeout(() => {
-    document.getElementById('question-card').classList.remove('pulse', 'shake');
-    currentQuestionIndex++;
-    updateProgress();
-    displayQuestion();
-    updateMarkedSection();
-  }, NEXT_DELAY);
+  // Show next button
+  document.getElementById('next-btn').classList.remove('hidden');
+
+  // Update marked section
+  updateMarkedSection();
+}
+
+function nextQuestion() {
+  document.getElementById('question-card').classList.remove('pulse', 'shake');
+  showNextQuestion();
 }
 
 function showFeedback(message, type) {
@@ -203,38 +238,12 @@ function showFeedback(message, type) {
   feedback.className = `feedback show ${type}`;
 }
 
-function updateProgress() {
-  const answered = Math.min(currentQuestionIndex, QUESTIONS_PER_SESSION);
-  document.getElementById('progress-count').textContent = `${answered} / ${QUESTIONS_PER_SESSION}`;
-  const pct = (answered / QUESTIONS_PER_SESSION) * 100;
-  document.getElementById('progress-fill').style.width = `${pct}%`;
-}
-
-// ── Summary ────────────────────────────────
-
-function showSummary() {
-  document.getElementById('quiz-area').classList.add('hidden');
-  document.getElementById('summary-area').classList.remove('hidden');
-
-  document.getElementById('summary-score').textContent = `${correctCount}/${QUESTIONS_PER_SESSION}`;
-  document.getElementById('stat-correct').textContent = correctCount;
-  document.getElementById('stat-incorrect').textContent = incorrectCount;
-
-  // Emoji based on score
-  const ratio = correctCount / QUESTIONS_PER_SESSION;
-  let emoji = '🎉';
-  if (ratio < 0.4) emoji = '💪';
-  else if (ratio < 0.7) emoji = '👍';
-  else if (ratio < 1) emoji = '🔥';
-  else emoji = '🏆';
-
-  document.getElementById('summary-emoji').textContent = emoji;
-}
-
 // ── Marked Words Section ───────────────────
 
 function updateMarkedSection() {
   const container = document.getElementById('marked-content');
+  if (!container) return;
+  
   const marked = getMarkedWords();
 
   if (marked.length === 0) {
@@ -278,6 +287,6 @@ function updateMarkedSection() {
 // ── Initialize ─────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
-  startNewQuiz();
-  updateMarkedSection();
+  detectLevel();
+  startQuiz();
 });

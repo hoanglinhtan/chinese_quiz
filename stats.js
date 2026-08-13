@@ -2,7 +2,7 @@
    HSK Quiz - Stats Page Logic
    ============================================ */
 
-const STORAGE_KEY = 'hsk5_wrong_counts';
+const STORAGE_KEY = 'hsk_wrong_counts';
 const WRONG_THRESHOLD = 2;
 
 function getWrongCounts() {
@@ -21,11 +21,18 @@ function saveWrongCounts(counts) {
 function getMarkedWords() {
   const counts = getWrongCounts();
   const marked = [];
-  for (const [no, count] of Object.entries(counts)) {
+  
+  // Search across all available data
+  const searchPool = typeof ALL_DATA !== 'undefined' ? ALL_DATA : [];
+  
+  for (const [chinese, count] of Object.entries(counts)) {
     if (count >= WRONG_THRESHOLD) {
-      const word = HSK5_DATA.find(w => w.no === parseInt(no));
+      const word = searchPool.find(w => w.chinese === chinese);
       if (word) {
         marked.push({ ...word, wrongCount: count });
+      } else {
+        // Word not found in data - show with basic info
+        marked.push({ chinese, pinyin: '—', meaning: '—', wrongCount: count });
       }
     }
   }
