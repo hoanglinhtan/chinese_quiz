@@ -7,13 +7,14 @@
   <title>HSK Quiz - Luyện Từ Vựng Tiếng Trung</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🀄</text></svg>">
+  <script src="theme.js"></script>
 </head>
 <body>
   <div class="app-container">
-    <header class="app-header">
+    <header class="app-header" style="position: relative;">
+      <button class="theme-toggle-btn" onclick="toggleTheme()" id="theme-btn" style="position: absolute; right: 0; top: var(--space-md);">☀️</button>
       <div class="app-logo">🀄</div>
       <h1 class="app-title">HSK Quiz</h1>
-      <p class="app-subtitle">Luyện từ vựng tiếng Trung mỗi ngày</p>
     </header>
 
     <main>
