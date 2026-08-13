@@ -1,6 +1,8 @@
 /* ============================================
-   HSK Quiz - Light / Dark Theme Manager
+   HSK Quiz - Multi-Theme Manager (Dark/Light/Pink)
    ============================================ */
+
+const THEMES = ['dark', 'light', 'pink'];
 
 function getSavedTheme() {
   return localStorage.getItem('hsk_theme') || 'dark';
@@ -10,17 +12,30 @@ function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem('hsk_theme', theme);
   
-  // Update toggle button icons across page
+  const icons = {
+    'dark': '🌙',
+    'light': '☀️',
+    'pink': '🌸'
+  };
+
+  const titles = {
+    'dark': 'Giao diện Tối (Nhấp để sang Sáng)',
+    'light': 'Giao diện Sáng (Nhấp để sang Hồng)',
+    'pink': 'Giao diện Hồng Sakura (Nhấp để sang Tối)'
+  };
+
   const btns = document.querySelectorAll('.theme-toggle-btn');
   btns.forEach(btn => {
-    btn.textContent = theme === 'light' ? '🌙' : '☀️';
-    btn.setAttribute('title', theme === 'light' ? 'Chuyển sang giao diện Tối' : 'Chuyển sang giao diện Sáng');
+    btn.textContent = icons[theme] || '🌙';
+    btn.setAttribute('title', titles[theme] || 'Đổi giao diện');
   });
 }
 
 function toggleTheme() {
   const current = getSavedTheme();
-  const next = current === 'light' ? 'dark' : 'light';
+  const currentIndex = THEMES.indexOf(current);
+  const nextIndex = (currentIndex + 1) % THEMES.length;
+  const next = THEMES[nextIndex];
   applyTheme(next);
 }
 
